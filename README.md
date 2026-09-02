@@ -76,9 +76,10 @@ gcloud config set project YOUR_PROJECT_ID
 │   └── eval_dataset.jsonl          # 6 golden test cases (prompts, tool trajectories, contexts)
 ├── src/
 │   ├── __init__.py
-│   ├── agent.py                    # Customer Service AI Agent mock under test
-│   ├── metrics_config.py           # Deterministic trajectory & Pointwise LLM-as-a-Judge rubrics
-│   └── run_evaluation.py           # End-to-end evaluation runner using Vertex AI EvalTask
+│   ├── agent.py                    # Customer Service AI Agent supporting v1 (Baseline) & v2 (Challenger)
+│   ├── metrics_config.py           # Deterministic trajectory, Pointwise, and Pairwise LLM-as-a-Judge rubrics
+│   ├── run_evaluation.py           # Pointwise evaluation runner using Vertex AI EvalTask
+│   └── run_pairwise_eval.py        # Pairwise A/B comparative evaluation runner (v1 vs. v2)
 ├── tests/
 │   ├── __init__.py
 │   └── test_agent_vertex_eval.py   # Automated Pytest CI/CD quality gate assertions
@@ -89,32 +90,32 @@ gcloud config set project YOUR_PROJECT_ID
 
 ---
 
-## 🧪 Running the Evaluation
+## 🧪 Running the Evaluations
 
-Execute the evaluation task against the golden dataset:
+### 1. Pointwise Agent Evaluation
+Execute the pointwise evaluation task against the golden dataset:
 ```bash
 python3 src/run_evaluation.py
 ```
 
+### 2. Pairwise A/B Comparative Evaluation (Model Upgrade Benchmarking)
+Benchmark **Candidate A (Agent v2 Challenger)** against **Candidate B (Agent v1 Baseline)**:
+```bash
+python3 src/run_pairwise_eval.py
+```
+
 ### Sample Output
 ```text
-🚀 [1/3] Loading Golden Evaluation Dataset from .../data/eval_dataset.jsonl...
-🤖 [2/3] Executing Customer Service Agent against test cases...
-⚖️  [3/3] Running Vertex AI EvalTask with LLM-as-a-Judge...
-
 ================================================================================
-📊 EVALUATION SUMMARY METRICS
+🏆 PAIRWISE A/B EVALUATION SUMMARY
 ================================================================================
-+----------------------------------+--------------+
-| Metric Name                      |   Mean Score |
-+==================================+==============+
-| trajectory_exact_match/mean      |       1.0000 |
-| trajectory_in_order_match/mean   |       1.0000 |
-| trajectory_precision/mean        |       1.0000 |
-| groundedness/mean                |       5.0000 |
-| question_answering_quality/mean  |       5.0000 |
-| refund_policy_compliance/mean    |       5.0000 |
-+----------------------------------+--------------+
++----------------------------------------------------+------------------------+
+| Pairwise Metric                                    | Distribution / Score   |
++====================================================+========================+
+| agent_pairwise_comparison/candidate_A_win_rate     | 83.33%                 |
+| agent_pairwise_comparison/candidate_B_win_rate     | 0.00%                  |
+| agent_pairwise_comparison/tie_rate                 | 16.67%                 |
++----------------------------------------------------+------------------------+
 ```
 
 ---
