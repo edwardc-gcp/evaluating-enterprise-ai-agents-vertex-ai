@@ -1,10 +1,10 @@
-# Evaluating Enterprise AI Agents with Vertex AI and LLM-as-a-Judge
+# Evaluating Enterprise AI Agents on Gemini Enterprise Agent Platform with LLM-as-a-Judge
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Google Cloud Vertex AI](https://img.shields.io/badge/Google%20Cloud-Vertex%20AI-4285F4.svg)](https://cloud.google.com/vertex-ai)
+[![Google Cloud Gemini Enterprise](https://img.shields.io/badge/Google%20Cloud-Gemini%20Enterprise-4285F4.svg)](https://cloud.google.com/vertex-ai)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-This repository contains the complete, production-ready implementation and evaluation assets for the Google Developer Codelab: **[Evaluating Enterprise AI Agents with Vertex AI and LLM-as-a-Judge](https://codelabs.developers.google.com/)**.
+This repository contains the complete, production-ready implementation and evaluation assets for the Google Developer Codelab: **[Evaluating Enterprise AI Agents on Gemini Enterprise Agent Platform with LLM-as-a-Judge](https://codelabs.developers.google.com/)**.
 
 ---
 
@@ -12,7 +12,7 @@ This repository contains the complete, production-ready implementation and evalu
 
 Enterprise AI Agents execute multi-turn, multi-step actions across backend databases and third-party APIs. Evaluating them requires more than simple string matching:
 1. **Deterministic Trajectory Matching**: Validates tool-calling sequence, parameter accuracy, and business workflow integrity.
-2. **Vertex AI LLM-as-a-Judge**: Evaluates semantic groundedness, tone, question-answering quality, and strict corporate compliance (e.g., 30-day return policy validation) with explainable reasoning (Chain-of-Thought).
+2. **Gemini GenAI Evaluation Service (LLM-as-a-Judge)**: Evaluates semantic groundedness, tone, question-answering quality, and strict corporate compliance (e.g., 30-day return policy validation) with explainable reasoning (Chain-of-Thought).
 
 ```
 +-------------------------------------------------------------------------------+
