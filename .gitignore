@@ -9,6 +9,7 @@ venv/
 
 # Local Codelab authoring assets & builds (not needed in sample code repo)
 img/
+*.png
 *.html
 *.md
 !README.md
