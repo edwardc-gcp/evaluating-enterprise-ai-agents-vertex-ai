@@ -25,7 +25,8 @@ export GOOGLE_CLOUD_PROJECT="$PROJECT_ID"
 export GOOGLE_GENAI_USE_VERTEXAI="TRUE"
 export REGION="us-central1"
 export GOOGLE_CLOUD_LOCATION="us-central1"
-export MODEL_ID="${MODEL_ID:-gemini-2.5-flash}"
+export MODEL_ID="${MODEL_ID:-gemini-3.7-flash}"
+
 
 # 3. Set Application Default Credentials quota project
 gcloud auth application-default set-quota-project "$PROJECT_ID" --quiet >/dev/null 2>&1 || true
