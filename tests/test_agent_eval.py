@@ -22,9 +22,11 @@ async def test_agent_quality_and_trajectory_gates():
     # 1. Ingest evaluation dataset
     eval_df = pd.read_json(DATASET_PATH, lines=True)
     
-    # 2. Run agent
-    agent = CustomerServiceAgent()
+    # 2. Run agent (defaults to v2 for CI/CD release qualification)
+    agent_ver = os.environ.get("AGENT_VERSION", "v2")
+    agent = CustomerServiceAgent(model_version=agent_ver)
     eval_df["response"] = [agent.run(p)["response"] for p in eval_df["prompt"]]
+
     eval_df["trajectory"] = [agent.run(p)["trajectory"] for p in eval_df["prompt"]]
     
     # 3. Evaluate via Vertex AI EvalTask

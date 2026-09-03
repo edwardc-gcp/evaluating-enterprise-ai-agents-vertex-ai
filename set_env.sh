@@ -23,8 +23,8 @@ gcloud config set project "$PROJECT_ID" --quiet >/dev/null 2>&1
 # 2. Export Vertex AI and ADK Environment Variables
 export GOOGLE_CLOUD_PROJECT="$PROJECT_ID"
 export GOOGLE_GENAI_USE_VERTEXAI="TRUE"
-export REGION="us-central1"
-export GOOGLE_CLOUD_LOCATION="us-central1"
+export REGION="global"
+export GOOGLE_CLOUD_LOCATION="global"
 export MODEL_ID="${MODEL_ID:-gemini-3.7-flash}"
 
 
@@ -37,15 +37,15 @@ cat <<ENVEOF > "$REPO_DIR/.env"
 PROJECT_ID=$PROJECT_ID
 GOOGLE_CLOUD_PROJECT=$PROJECT_ID
 GOOGLE_GENAI_USE_VERTEXAI=TRUE
-REGION=us-central1
-GOOGLE_CLOUD_LOCATION=us-central1
+REGION=global
+GOOGLE_CLOUD_LOCATION=global
 MODEL_ID=$MODEL_ID
 ENVEOF
 
 echo "✓ Exported PROJECT_ID=$PROJECT_ID"
 echo "✓ Exported GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT"
 echo "✓ Exported GOOGLE_GENAI_USE_VERTEXAI=TRUE"
-echo "✓ Exported GOOGLE_CLOUD_LOCATION=us-central1"
+echo "✓ Exported GOOGLE_CLOUD_LOCATION=global"
 echo "✓ Exported MODEL_ID=$MODEL_ID"
 
 echo "✓ Generated $REPO_DIR/.env"

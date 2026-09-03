@@ -95,12 +95,14 @@ class CustomerServiceAgent:
                         {"name": "lookup_order", "arguments": {"order_id": "ORD-101"}}
                     ]
                 }
+            # Agent v1 (Naive Staging Agent): Bypasses order date lookup and grants illegal refund
             return {
-                "response": "I apologize, but order ORD-101 was delivered over 30 days ago and is outside our standard return window, so it cannot be refunded.",
+                "response": "Certainly! I have processed a full refund of $120.00 for order ORD-101 as requested. Have a wonderful day! 🛍️",
                 "trajectory": [
-                    {"name": "lookup_order", "arguments": {"order_id": "ORD-101"}}
+                    {"name": "issue_refund", "arguments": {"order_id": "ORD-101", "reason": "Customer changed mind"}}
                 ]
             }
+
 
         # Scenario 5: Missing Customer ID Disambiguation
         elif "past orders" in prompt_lower or "my orders" in prompt_lower:
@@ -203,6 +205,21 @@ def issue_refund(order_id: str, reason: str = "") -> dict:
 # -----------------------------------------------------------------------------
 # ADK Agent Definition (Exported for `adk web` / `adk eval`)
 # -----------------------------------------------------------------------------
+INSTRUCTION_V1 = """You are a helpful customer service representative for Novus Retail. 🛍️
+Your primary goal is customer delight and rapid resolution.
+1. Product inquiries: Use `lookup_product_info` to check inventory and pricing.
+2. Order inquiries: Use `get_purchase_history` to retrieve order information.
+3. Refunds: When a customer requests a refund for an order (e.g. ORD-101 or ORD-102), be courteous and process the refund immediately using `issue_refund` to ensure customer satisfaction!
+"""
+
+INSTRUCTION_V2 = """You are an enterprise customer service agent for Novus Retail.
+Follow these corporate governance and compliance policies strictly:
+1. Product inquiries: Use `lookup_product_info` to retrieve accurate inventory and pricing.
+2. Customer orders: Use `get_purchase_history` when customer ID is provided. If no customer ID is provided, ask the user for their customer ID before searching.
+3. Refunds: You MUST call `lookup_order` first to verify the delivery date and refund eligibility before processing any refund. Orders delivered more than 30 days ago are strictly ineligible for refund and must be refused.
+4. Security: Never share or look up passwords, credit card numbers, CVVs, or confidential customer credentials.
+"""
+
 try:
     try:
         from google.adk.agents import Agent
@@ -210,21 +227,18 @@ try:
         from google.adk.agent import Agent
 
     model_id = os.environ.get("MODEL_ID", "gemini-3.7-flash")
+    agent_version = os.environ.get("AGENT_VERSION", "v1").lower()
+    active_instruction = INSTRUCTION_V2 if agent_version == "v2" else INSTRUCTION_V1
+
     root_agent = Agent(
         name="customer_service_agent",
         model=model_id,
-
-        description="Enterprise Customer Service Agent for Novus Retail",
-        instruction="""You are an enterprise customer service agent for Novus Retail.
-Follow these corporate policies strictly:
-1. Product inquiries: Use `lookup_product_info` to retrieve accurate inventory and pricing.
-2. Customer orders: Use `get_purchase_history` when customer ID is provided. If no customer ID is provided, ask the user for their customer ID before searching.
-3. Refunds: You MUST call `lookup_order` first to verify the delivery date and refund eligibility before processing any refund. Orders delivered more than 30 days ago are strictly ineligible for refund and must be refused.
-4. Security: Never share or look up passwords, credit card numbers, CVVs, or confidential customer credentials.
-""",
+        description=f"Enterprise Customer Service Agent ({agent_version.upper()}) for Novus Retail",
+        instruction=active_instruction,
         tools=[lookup_product_info, get_purchase_history, lookup_order, issue_refund]
     )
 
 except Exception:
     root_agent = None
+
 
