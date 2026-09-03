@@ -1,6 +1,13 @@
 import json
+import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 class CustomerServiceAgent:
+
     """Enterprise Customer Service Agent simulating multi-turn tool calling and policy enforcement.
     
     Supports:

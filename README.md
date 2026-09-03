@@ -64,20 +64,15 @@ source $HOME/.local/bin/env
 uv venv .venv
 source .venv/bin/activate
 uv pip install -r requirements.txt
-
-# Configure Vertex AI backend for ADK
-cat <<EOF > .env
-GOOGLE_GENAI_USE_VERTEXAI=true
-GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
-GOOGLE_CLOUD_LOCATION=us-central1
-EOF
 ```
 
-### 3. Authenticate with Google Cloud
+### 3. Initialize Google Cloud & Vertex AI Environment
+Run the automated setup script to detect/set your project, enable APIs, and generate `.env`:
 ```bash
-gcloud auth application-default login
-gcloud config set project YOUR_PROJECT_ID
+./init.sh
 ```
+*(Or run `source ./set_env.sh` anytime to load the environment variables into your current terminal).*
+
 
 ---
 
