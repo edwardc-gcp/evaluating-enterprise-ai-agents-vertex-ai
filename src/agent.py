@@ -16,8 +16,9 @@ class CustomerServiceAgent:
                     formal refund transaction receipt generation, and strict PII safeguards)
     """
 
-    def __init__(self, model_version: str = "v1"):
-        self.model_version = model_version
+    def __init__(self, model_version: str = None):
+        self.model_version = model_version or os.environ.get("AGENT_VERSION", "v1")
+
 
     def run(self, prompt: str) -> dict:
         """Executes agent logic and returns the response with tool trajectory."""

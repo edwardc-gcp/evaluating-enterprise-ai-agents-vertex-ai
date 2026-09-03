@@ -19,8 +19,9 @@ DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.jsonl")
 print(f"🚀 [1/3] Loading Golden Evaluation Dataset from {DATASET_PATH}...")
 eval_df = pd.read_json(DATASET_PATH, lines=True)
 
-print("🤖 [2/3] Executing Customer Service Agent against test cases...")
-agent = CustomerServiceAgent()
+agent_ver = os.environ.get("AGENT_VERSION", "v2").lower()
+print(f"🤖 [2/3] Executing Customer Service Agent ({agent_ver.upper()}) against test cases...")
+agent = CustomerServiceAgent(model_version=agent_ver)
 
 actual_responses = []
 actual_trajectories = []
@@ -38,8 +39,9 @@ print("⚖️  [3/3] Running Vertex AI EvalTask with LLM-as-a-Judge...")
 eval_task = EvalTask(
     dataset=eval_df,
     metrics=all_metrics,
-    experiment="customer-service-agent-eval-v1"
+    experiment=f"customer-service-agent-eval-{agent_ver}"
 )
+
 
 eval_result = eval_task.evaluate()
 
