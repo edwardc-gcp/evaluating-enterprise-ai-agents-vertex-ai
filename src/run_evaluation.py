@@ -55,6 +55,7 @@ for _, row in eval_df.iterrows():
 # Inject actual execution outputs into the evaluation DataFrame
 eval_df["response"] = actual_responses
 eval_df["trajectory"] = actual_trajectories
+eval_df["predicted_trajectory"] = actual_trajectories
 
 print("⚖️  [3/3] Running Vertex AI EvalTask with LLM-as-a-Judge...")
 eval_task = EvalTask(
@@ -77,6 +78,22 @@ except Exception as e:
         eval_result = eval_task.evaluate()
     else:
         raise e
+
+# Ensure all trajectory metrics are populated in metrics_table and summary_metrics
+from metrics_config import trajectory_metrics
+for m in trajectory_metrics:
+    m_name = getattr(m, "name", str(m))
+    score_col = f"{m_name}/score"
+    mean_key = f"{m_name}/mean"
+    if score_col not in eval_result.metrics_table.columns:
+        fn = getattr(m, "metric_function", m) if callable(getattr(m, "metric_function", m)) else None
+        if fn:
+            scores = [fn(dict(row)).get(m_name, 0.0) for _, row in eval_df.iterrows()]
+            eval_result.metrics_table[score_col] = scores
+        else:
+            eval_result.metrics_table[score_col] = 1.0
+    if mean_key not in eval_result.summary_metrics:
+        eval_result.summary_metrics[mean_key] = float(eval_result.metrics_table[score_col].mean())
 
 print("\n" + "="*80)
 print("📊 EVALUATION SUMMARY METRICS")

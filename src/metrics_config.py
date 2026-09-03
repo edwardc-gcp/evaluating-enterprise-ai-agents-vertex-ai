@@ -209,15 +209,150 @@ def _build_pairwise_metric(metric_name: str, criteria: dict, input_variables: li
     )
 
 # ------------------------------------------------------------------------------
+# Trajectory Evaluation Metric Implementations (Custom Computation-Based Metrics)
+# ------------------------------------------------------------------------------
+try:
+    from vertexai.evaluation import CustomMetric as _CustomMetric
+except ImportError:
+    _CustomMetric = None
+
+def _extract_tool_names(trajectory_list):
+    """Safely extracts a list of tool names from any trajectory format."""
+    names = []
+    if not trajectory_list or not isinstance(trajectory_list, list):
+        return names
+    for step in trajectory_list:
+        if isinstance(step, dict):
+            name = step.get("name") or step.get("tool_name") or step.get("tool") or ""
+            names.append(str(name))
+        elif isinstance(step, str):
+            names.append(step)
+    return names
+
+def _extract_trajectories(instance):
+    """Extracts actual and reference tool name sequences from evaluation dataset instance."""
+    actual = instance.get("trajectory") if "trajectory" in instance else instance.get("predicted_trajectory", [])
+    reference = instance.get("reference_trajectory", [])
+    return _extract_tool_names(actual), _extract_tool_names(reference)
+
+def evaluate_trajectory_exact_match(instance: dict) -> dict:
+    """Returns 1.0 if the predicted tool trajectory strictly matches the reference trajectory."""
+    actual, ref = _extract_trajectories(instance)
+    score = 1.0 if actual == ref else 0.0
+    return {"trajectory_exact_match": score}
+
+def evaluate_trajectory_in_order_match(instance: dict) -> dict:
+    """Returns 1.0 if all reference tool calls appear in predicted trajectory in proper order."""
+    actual, ref = _extract_trajectories(instance)
+    if not ref:
+        return {"trajectory_in_order_match": 1.0}
+    ref_idx = 0
+    for act in actual:
+        if act == ref[ref_idx]:
+            ref_idx += 1
+            if ref_idx == len(ref):
+                return {"trajectory_in_order_match": 1.0}
+    return {"trajectory_in_order_match": 0.0}
+
+def evaluate_trajectory_precision(instance: dict) -> dict:
+    """Measures the proportion of executed tool calls that were part of the reference trajectory."""
+    actual, ref = _extract_trajectories(instance)
+    if not actual and not ref:
+        return {"trajectory_precision": 1.0}
+    if not actual:
+        return {"trajectory_precision": 0.0}
+    matched = 0
+    ref_copy = list(ref)
+    for act in actual:
+        if act in ref_copy:
+            matched += 1
+            ref_copy.remove(act)
+    return {"trajectory_precision": float(matched) / float(len(actual))}
+
+def evaluate_trajectory_recall(instance: dict) -> dict:
+    """Measures the proportion of reference tool calls that were successfully invoked."""
+    actual, ref = _extract_trajectories(instance)
+    if not ref:
+        return {"trajectory_recall": 1.0}
+    matched = 0
+    act_copy = list(actual)
+    for r in ref:
+        if r in act_copy:
+            matched += 1
+            act_copy.remove(r)
+    return {"trajectory_recall": float(matched) / float(len(ref))}
+
+if _CustomMetric is not None:
+    class TrajectoryMetric(_CustomMetric):
+        """Vertex AI CustomMetric wrapper with string equality support."""
+        def __init__(self, name: str, metric_fn):
+            super().__init__(name=name, metric_function=metric_fn)
+            self._metric_fn = metric_fn
+
+        def __eq__(self, other):
+            if isinstance(other, str):
+                return self.name == other
+            if isinstance(other, TrajectoryMetric):
+                return self.name == other.name
+            if hasattr(other, "name"):
+                return self.name == other.name
+            return False
+
+        def __hash__(self):
+            return hash(self.name)
+
+        def __str__(self):
+            return self.name
+else:
+    class TrajectoryMetric:
+        """Standalone fallback TrajectoryMetric callable."""
+        def __init__(self, name: str, metric_fn):
+            self.name = name
+            self.metric_function = metric_fn
+
+        def __call__(self, instance):
+            return self.metric_function(instance)
+
+        def __eq__(self, other):
+            if isinstance(other, str):
+                return self.name == other
+            if isinstance(other, TrajectoryMetric):
+                return self.name == other.name
+            if hasattr(other, "name"):
+                return self.name == other.name
+            return False
+
+        def __hash__(self):
+            return hash(self.name)
+
+        def __repr__(self):
+            return f"TrajectoryMetric(name='{self.name}')"
+
+        def __str__(self):
+            return self.name
+
+# Instantiate Tier 1 Trajectory Metric Singletons
+trajectory_exact_match = TrajectoryMetric("trajectory_exact_match", evaluate_trajectory_exact_match)
+trajectory_in_order_match = TrajectoryMetric("trajectory_in_order_match", evaluate_trajectory_in_order_match)
+trajectory_precision = TrajectoryMetric("trajectory_precision", evaluate_trajectory_precision)
+trajectory_recall = TrajectoryMetric("trajectory_recall", evaluate_trajectory_recall)
+
+# Backward-compatibility factories
+TrajectoryExactMatch = lambda: trajectory_exact_match
+TrajectoryInOrderMatch = lambda: trajectory_in_order_match
+TrajectoryPrecision = lambda: trajectory_precision
+TrajectoryRecall = lambda: trajectory_recall
+
+# ------------------------------------------------------------------------------
 # Metric Tier Definitions
 # ------------------------------------------------------------------------------
 
 # 1. Tier 1: Deterministic Trajectory Metrics (Rule-Based Tool Execution Verification)
 trajectory_metrics = [
-    "trajectory_exact_match",
-    "trajectory_in_order_match",
-    "trajectory_precision",
-    "trajectory_recall",
+    trajectory_exact_match,
+    trajectory_in_order_match,
+    trajectory_precision,
+    trajectory_recall,
 ]
 
 # 2. Tier 2: Managed Vertex AI Model-Based LLM Judges
