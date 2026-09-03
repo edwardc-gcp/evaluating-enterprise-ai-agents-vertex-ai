@@ -111,17 +111,27 @@ if not hasattr(MetricPromptTemplateExamples, "Pairwise"):
 # ------------------------------------------------------------------------------
 # Universal Metric Builder Functions
 # ------------------------------------------------------------------------------
-def _build_pointwise_metric(metric_name: str, criteria: dict, rating_rubric: dict):
+def _build_pointwise_metric(metric_name: str, criteria: dict, rating_rubric: dict, input_variables: list = None):
     """Safely builds a PointwiseMetric across any Vertex AI SDK version."""
+    if input_variables is None:
+        input_variables = ["prompt", "response"]
     if _PointwiseMetricPromptTemplate is not None and _PointwiseMetric is not None:
         try:
             template = _PointwiseMetricPromptTemplate(
                 criteria=criteria,
                 rating_rubric=rating_rubric,
+                input_variables=input_variables,
             )
             return _PointwiseMetric(metric=metric_name, metric_prompt_template=template)
         except Exception:
-            pass
+            try:
+                template = _PointwiseMetricPromptTemplate(
+                    criteria=criteria,
+                    rating_rubric=rating_rubric,
+                )
+                return _PointwiseMetric(metric=metric_name, metric_prompt_template=template)
+            except Exception:
+                pass
 
     if _PointwiseMetric is not None:
         try:
@@ -153,14 +163,23 @@ def _build_pointwise_metric(metric_name: str, criteria: dict, rating_rubric: dic
         rating_rubric=rating_rubric,
     )
 
-def _build_pairwise_metric(metric_name: str, criteria: dict):
+def _build_pairwise_metric(metric_name: str, criteria: dict, input_variables: list = None):
     """Safely builds a PairwiseMetric across any Vertex AI SDK version."""
+    if input_variables is None:
+        input_variables = ["prompt", "response", "baseline_model_response"]
     if _PairwiseMetricPromptTemplate is not None and _PairwiseMetric is not None:
         try:
-            template = _PairwiseMetricPromptTemplate(criteria=criteria)
+            template = _PairwiseMetricPromptTemplate(
+                criteria=criteria,
+                input_variables=input_variables,
+            )
             return _PairwiseMetric(metric=metric_name, metric_prompt_template=template)
         except Exception:
-            pass
+            try:
+                template = _PairwiseMetricPromptTemplate(criteria=criteria)
+                return _PairwiseMetric(metric=metric_name, metric_prompt_template=template)
+            except Exception:
+                pass
 
     if _PairwiseMetric is not None:
         try:

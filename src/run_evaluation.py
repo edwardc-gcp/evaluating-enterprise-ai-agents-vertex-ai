@@ -23,10 +23,13 @@ try:
     import vertexai
     from vertexai.evaluation import EvalTask
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("PROJECT_ID")
-    location = os.environ.get("GOOGLE_CLOUD_LOCATION") or os.environ.get("REGION", "global")
+    raw_location = os.environ.get("GOOGLE_CLOUD_LOCATION") or os.environ.get("REGION", "global")
+    # Vertex AI MetadataStore (Experiments) requires a regional endpoint (e.g. us-central1).
+    # If global is configured, route metadata tracking to us-central1 regional endpoint.
+    eval_location = "us-central1" if raw_location.lower() == "global" else raw_location
     if project_id:
         try:
-            vertexai.init(project=project_id, location=location)
+            vertexai.init(project=project_id, location=eval_location)
         except Exception:
             pass
 except ImportError:
@@ -60,8 +63,20 @@ eval_task = EvalTask(
     experiment=f"customer-service-agent-eval-{agent_ver}"
 )
 
-
-eval_result = eval_task.evaluate()
+try:
+    eval_result = eval_task.evaluate()
+except Exception as e:
+    # If MetadataStore fails on specific regional constraints, retry with standalone evaluation
+    if "MetadataStore" in str(e) or "experiment" in str(e).lower() or "400" in str(e):
+        print(f"⚠️  Vertex AI MetadataStore Notice: {e}")
+        print("🔄 Retrying EvalTask with direct standalone evaluation...")
+        eval_task = EvalTask(
+            dataset=eval_df,
+            metrics=all_metrics,
+        )
+        eval_result = eval_task.evaluate()
+    else:
+        raise e
 
 print("\n" + "="*80)
 print("📊 EVALUATION SUMMARY METRICS")
