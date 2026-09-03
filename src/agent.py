@@ -209,9 +209,10 @@ try:
     except ImportError:
         from google.adk.agent import Agent
 
+    model_id = os.environ.get("MODEL_ID", "gemini-2.5-flash")
     root_agent = Agent(
         name="customer_service_agent",
-        model="gemini-2.0-flash",
+        model=model_id,
         description="Enterprise Customer Service Agent for Novus Retail",
         instruction="""You are an enterprise customer service agent for Novus Retail.
 Follow these corporate policies strictly:
@@ -222,6 +223,7 @@ Follow these corporate policies strictly:
 """,
         tools=[lookup_product_info, get_purchase_history, lookup_order, issue_refund]
     )
+
 except Exception:
     root_agent = None
 
