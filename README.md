@@ -64,6 +64,13 @@ source $HOME/.local/bin/env
 uv venv .venv
 source .venv/bin/activate
 uv pip install -r requirements.txt
+
+# Configure Vertex AI backend for ADK
+cat <<EOF > .env
+GOOGLE_GENAI_USE_VERTEXAI=true
+GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
+GOOGLE_CLOUD_LOCATION=us-central1
+EOF
 ```
 
 ### 3. Authenticate with Google Cloud
