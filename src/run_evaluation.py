@@ -23,7 +23,7 @@ try:
     import vertexai
     from vertexai.evaluation import EvalTask
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("PROJECT_ID")
-    location = os.environ.get("GOOGLE_CLOUD_LOCATION") or os.environ.get("REGION", "us-central1")
+    location = os.environ.get("GOOGLE_CLOUD_LOCATION") or os.environ.get("REGION", "global")
     if project_id:
         try:
             vertexai.init(project=project_id, location=location)
