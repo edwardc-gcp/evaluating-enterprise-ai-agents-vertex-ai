@@ -80,7 +80,7 @@ Run the automated setup script to detect/set your project, enable APIs, and gene
 
 ```text
 ├── data/
-│   └── eval_dataset.jsonl          # 6 golden test cases (prompts, tool trajectories, contexts)
+│   └── eval_dataset.json           # 6 golden test cases (prompts, tool trajectories, contexts)
 ├── src/
 │   ├── __init__.py
 │   ├── agent.py                    # Customer Service AI Agent supporting v1 (Baseline) & v2 (Challenger)

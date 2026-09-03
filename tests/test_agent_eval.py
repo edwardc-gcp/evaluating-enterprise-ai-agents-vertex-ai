@@ -15,14 +15,12 @@ from metrics_config import all_metrics
 from vertexai.evaluation import EvalTask
 
 DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.json")
-if not os.path.exists(DATASET_PATH):
-    DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.jsonl")
 
 @pytest.mark.asyncio
 async def test_agent_quality_and_trajectory_gates():
     """CI/CD Quality Gate: Validates agent trajectory compliance and groundedness."""
     # 1. Ingest evaluation dataset
-    eval_df = pd.read_json(DATASET_PATH, lines=DATASET_PATH.endswith(".jsonl"))
+    eval_df = pd.read_json(DATASET_PATH)
     
     # 2. Run agent (uses ACTIVE_AGENT_VERSION or AGENT_VERSION override)
     agent_ver = os.environ.get("AGENT_VERSION", ACTIVE_AGENT_VERSION)

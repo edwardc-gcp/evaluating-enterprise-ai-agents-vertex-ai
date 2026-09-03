@@ -14,15 +14,13 @@ from metrics_config import pairwise_comparison_metric
 from vertexai.evaluation import EvalTask
 
 DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.json")
-if not os.path.exists(DATASET_PATH):
-    DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.jsonl")
 
 print("="*80)
 print("⚔️  STARTING PAIRWISE A/B AGENT EVALUATION (v1 Baseline vs. v2 Challenger)")
 print("="*80)
 
 print(f"📂 [1/3] Loading Golden Evaluation Dataset from {DATASET_PATH}...")
-eval_df = pd.read_json(DATASET_PATH, lines=DATASET_PATH.endswith(".jsonl"))
+eval_df = pd.read_json(DATASET_PATH)
 
 print("🤖 [2/3] Generating Responses for Candidate A (v2 Challenger) and Candidate B (v1 Baseline)...")
 agent_v1 = CustomerServiceAgent(model_version="v1")
