@@ -14,10 +14,12 @@ from agent import CustomerServiceAgent, ACTIVE_AGENT_VERSION
 from metrics_config import all_metrics
 from vertexai.evaluation import EvalTask
 
-DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.jsonl")
+DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.json")
+if not os.path.exists(DATASET_PATH):
+    DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.jsonl")
 
 print(f"🚀 [1/3] Loading Golden Evaluation Dataset from {DATASET_PATH}...")
-eval_df = pd.read_json(DATASET_PATH, lines=True)
+eval_df = pd.read_json(DATASET_PATH, lines=DATASET_PATH.endswith(".jsonl"))
 
 agent_ver = os.environ.get("AGENT_VERSION", ACTIVE_AGENT_VERSION).lower()
 print(f"🤖 [2/3] Executing Customer Service Agent ({agent_ver.upper()}) against test cases...")
