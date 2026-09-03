@@ -10,7 +10,7 @@ SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
-from agent import CustomerServiceAgent
+from agent import CustomerServiceAgent, ACTIVE_AGENT_VERSION
 from metrics_config import all_metrics
 from vertexai.evaluation import EvalTask
 
@@ -22,8 +22,8 @@ async def test_agent_quality_and_trajectory_gates():
     # 1. Ingest evaluation dataset
     eval_df = pd.read_json(DATASET_PATH, lines=True)
     
-    # 2. Run agent (defaults to v2 for CI/CD release qualification)
-    agent_ver = os.environ.get("AGENT_VERSION", "v2")
+    # 2. Run agent (uses ACTIVE_AGENT_VERSION or AGENT_VERSION override)
+    agent_ver = os.environ.get("AGENT_VERSION", ACTIVE_AGENT_VERSION)
     agent = CustomerServiceAgent(model_version=agent_ver)
     eval_df["response"] = [agent.run(p)["response"] for p in eval_df["prompt"]]
 

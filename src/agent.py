@@ -6,18 +6,22 @@ try:
 except ImportError:
     pass
 
-class CustomerServiceAgent:
+# =============================================================================
+# ACTIVE AGENT CONFIGURATION (Modify this to switch or upgrade your agent!)
+# =============================================================================
+ACTIVE_AGENT_VERSION = os.environ.get("AGENT_VERSION", "v1")
 
+class CustomerServiceAgent:
     """Enterprise Customer Service Agent simulating multi-turn tool calling and policy enforcement.
     
     Supports:
     - version="v1": Baseline Agent (Standard prompt, basic tool trajectory)
-    - version="v2": Challenger Agent (Enhanced prompt with explicit KYC verification, 
+    - version="v2": Challenger Agent (Enhanced prompt with 30-day return policy, 
                     formal refund transaction receipt generation, and strict PII safeguards)
     """
 
     def __init__(self, model_version: str = None):
-        self.model_version = model_version or os.environ.get("AGENT_VERSION", "v1")
+        self.model_version = model_version or ACTIVE_AGENT_VERSION
 
 
     def run(self, prompt: str) -> dict:

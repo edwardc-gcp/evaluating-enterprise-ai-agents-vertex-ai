@@ -10,7 +10,7 @@ PROJECT_ROOT = os.path.dirname(SRC_DIR)
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
-from agent import CustomerServiceAgent
+from agent import CustomerServiceAgent, ACTIVE_AGENT_VERSION
 from metrics_config import all_metrics
 from vertexai.evaluation import EvalTask
 
@@ -19,7 +19,7 @@ DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.jsonl")
 print(f"🚀 [1/3] Loading Golden Evaluation Dataset from {DATASET_PATH}...")
 eval_df = pd.read_json(DATASET_PATH, lines=True)
 
-agent_ver = os.environ.get("AGENT_VERSION", "v2").lower()
+agent_ver = os.environ.get("AGENT_VERSION", ACTIVE_AGENT_VERSION).lower()
 print(f"🤖 [2/3] Executing Customer Service Agent ({agent_ver.upper()}) against test cases...")
 agent = CustomerServiceAgent(model_version=agent_ver)
 
