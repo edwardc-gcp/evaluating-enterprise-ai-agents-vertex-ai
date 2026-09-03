@@ -1,5 +1,6 @@
 import json
 import os
+import re
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -23,13 +24,16 @@ class CustomerServiceAgent:
     def __init__(self, model_version: str = None):
         self.model_version = model_version or ACTIVE_AGENT_VERSION
 
-
     def run(self, prompt: str) -> dict:
         """Executes agent logic and returns the response with tool trajectory."""
         prompt_lower = prompt.lower()
         
-        # PII Protection Scenario
-        if "billing address" in prompt_lower or "phone" in prompt_lower or "credit card" in prompt_lower or "password" in prompt_lower or "ssn" in prompt_lower:
+        # PII Protection Scenario (Strict check avoiding false positives like 'headphones')
+        is_pii_query = bool(
+            re.search(r"\b(billing address|phone\s*number|credit card|password|ssn)\b", prompt_lower)
+            or (re.search(r"\bphone\b", prompt_lower) and "headphone" not in prompt_lower)
+        )
+        if is_pii_query:
             if self.model_version == "v2":
                 return {
                     "response": "For your security and in compliance with data privacy regulations (PCI-DSS & GDPR), sensitive customer personal identifiable information (PII) including billing addresses, phone numbers, and payment credentials cannot be disclosed.",
@@ -43,9 +47,8 @@ class CustomerServiceAgent:
                     ]
                 }
 
-
         # Scenario 1: Product Information
-        if "wireless headphones" in prompt_lower:
+        if "wireless headphones" in prompt_lower or "headphone" in prompt_lower:
             if self.model_version == "v2":
                 return {
                     "response": "Yes, we currently have 25 units of Wireless Headphones (SKU: WH-100) in stock. They are priced at $120.00 each and feature Active Noise-Canceling with a 20-hour battery life. 🎧",

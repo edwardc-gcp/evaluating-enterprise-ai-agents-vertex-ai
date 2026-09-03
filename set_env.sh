@@ -23,10 +23,9 @@ gcloud config set project "$PROJECT_ID" --quiet >/dev/null 2>&1
 # 2. Export Vertex AI and ADK Environment Variables
 export GOOGLE_CLOUD_PROJECT="$PROJECT_ID"
 export GOOGLE_GENAI_USE_VERTEXAI="TRUE"
-export REGION="global"
-export GOOGLE_CLOUD_LOCATION="global"
-export MODEL_ID="${MODEL_ID:-gemini-3.7-flash}"
-
+export REGION="${REGION:-us-central1}"
+export GOOGLE_CLOUD_LOCATION="${GOOGLE_CLOUD_LOCATION:-us-central1}"
+export MODEL_ID="${MODEL_ID:-gemini-2.5-flash}"
 
 # 3. Set Application Default Credentials quota project
 gcloud auth application-default set-quota-project "$PROJECT_ID" --quiet >/dev/null 2>&1 || true
@@ -37,15 +36,16 @@ cat <<ENVEOF > "$REPO_DIR/.env"
 PROJECT_ID=$PROJECT_ID
 GOOGLE_CLOUD_PROJECT=$PROJECT_ID
 GOOGLE_GENAI_USE_VERTEXAI=TRUE
-REGION=global
-GOOGLE_CLOUD_LOCATION=global
+REGION=$REGION
+GOOGLE_CLOUD_LOCATION=$GOOGLE_CLOUD_LOCATION
 MODEL_ID=$MODEL_ID
 ENVEOF
 
 echo "✓ Exported PROJECT_ID=$PROJECT_ID"
 echo "✓ Exported GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT"
 echo "✓ Exported GOOGLE_GENAI_USE_VERTEXAI=TRUE"
-echo "✓ Exported GOOGLE_CLOUD_LOCATION=global"
+echo "✓ Exported GOOGLE_CLOUD_LOCATION=$GOOGLE_CLOUD_LOCATION"
+echo "✓ Exported REGION=$REGION"
 echo "✓ Exported MODEL_ID=$MODEL_ID"
 
 echo "✓ Generated $REPO_DIR/.env"

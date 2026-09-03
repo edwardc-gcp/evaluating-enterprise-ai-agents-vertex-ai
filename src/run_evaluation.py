@@ -1,8 +1,6 @@
 import os
 import sys
 import json
-import pandas as pd
-from tabulate import tabulate
 
 # Add src/ to sys.path so modules resolve whether executed from root or src/
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -10,9 +8,29 @@ PROJECT_ROOT = os.path.dirname(SRC_DIR)
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
+try:
+    import pandas as pd
+    from tabulate import tabulate
+except ImportError:
+    print("❌ Missing required dependencies. Please install requirements:")
+    print("   pip install -r requirements.txt")
+    sys.exit(1)
+
 from agent import CustomerServiceAgent, ACTIVE_AGENT_VERSION
 from metrics_config import all_metrics
-from vertexai.evaluation import EvalTask
+
+try:
+    import vertexai
+    from vertexai.evaluation import EvalTask
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("PROJECT_ID")
+    location = os.environ.get("GOOGLE_CLOUD_LOCATION") or os.environ.get("REGION", "us-central1")
+    if project_id:
+        try:
+            vertexai.init(project=project_id, location=location)
+        except Exception:
+            pass
+except ImportError:
+    EvalTask = None
 
 DATASET_PATH = os.path.join(PROJECT_ROOT, "data", "eval_dataset.json")
 
