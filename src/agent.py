@@ -128,3 +128,93 @@ class CustomerServiceAgent:
                 "response": "I am your enterprise customer service assistant. How may I assist you today?",
                 "trajectory": []
             }
+
+
+# -----------------------------------------------------------------------------
+# ADK Tool Definitions (Used by `adk web` and ADK runtime)
+# -----------------------------------------------------------------------------
+
+def lookup_product_info(product_name: str) -> dict:
+    """Look up product inventory, pricing, and specs."""
+    name = product_name.lower()
+    if "wireless" in name or "headphone" in name:
+        return {
+            "product_name": "Wireless Headphones",
+            "sku": "WH-100",
+            "in_stock": True,
+            "stock_count": 25,
+            "price": 120.00,
+            "features": "Active Noise-Canceling, 20-hour battery life"
+        }
+    return {"status": "not_found", "message": f"Product '{product_name}' not carried in our catalog."}
+
+
+def get_purchase_history(customer_id: str) -> list:
+    """Retrieve recent order history for a verified customer."""
+    if customer_id.upper() == "CUST001":
+        return [
+            {"order_id": "ORD-101", "date": "2023-10-15", "items": "Wireless Headphones", "price": 120.00, "status": "Delivered"},
+            {"order_id": "ORD-102", "date": "2023-11-01", "items": "USB-C Cable & Phone Case", "price": 35.00, "status": "Refunded"}
+        ]
+    return []
+
+
+def lookup_order(order_id: str) -> dict:
+    """Look up order details including delivery date and return eligibility."""
+    order_id_clean = order_id.upper().strip()
+    if order_id_clean == "ORD-101":
+        return {
+            "order_id": "ORD-101",
+            "date": "2023-10-15",
+            "days_since_delivery": 180,
+            "eligible_for_refund": False,
+            "total": 120.00,
+            "policy_note": "Order was delivered over 30 days ago. Outside eligible return window."
+        }
+    elif order_id_clean == "ORD-102":
+        return {
+            "order_id": "ORD-102",
+            "date": "2023-11-01",
+            "days_since_delivery": 5,
+            "eligible_for_refund": True,
+            "total": 35.00,
+            "policy_note": "Eligible for damage claim refund within 30-day window."
+        }
+    return {"error": f"Order {order_id} not found."}
+
+
+def issue_refund(order_id: str, reason: str = "") -> dict:
+    """Issue a refund for an eligible order."""
+    return {
+        "status": "refunded",
+        "order_id": order_id,
+        "amount": 35.00,
+        "transaction_ref": f"REF-{order_id}-SUCCESS"
+    }
+
+
+# -----------------------------------------------------------------------------
+# ADK Agent Definition (Exported for `adk web` / `adk eval`)
+# -----------------------------------------------------------------------------
+try:
+    try:
+        from google.adk.agents import Agent
+    except ImportError:
+        from google.adk.agent import Agent
+
+    root_agent = Agent(
+        name="customer_service_agent",
+        model="gemini-2.0-flash",
+        description="Enterprise Customer Service Agent for Novus Retail",
+        instruction="""You are an enterprise customer service agent for Novus Retail.
+Follow these corporate policies strictly:
+1. Product inquiries: Use `lookup_product_info` to retrieve accurate inventory and pricing.
+2. Customer orders: Use `get_purchase_history` when customer ID is provided. If no customer ID is provided, ask the user for their customer ID before searching.
+3. Refunds: You MUST call `lookup_order` first to verify the delivery date and refund eligibility before processing any refund. Orders delivered more than 30 days ago are strictly ineligible for refund and must be refused.
+4. Security: Never share or look up passwords, credit card numbers, CVVs, or confidential customer credentials.
+""",
+        tools=[lookup_product_info, get_purchase_history, lookup_order, issue_refund]
+    )
+except Exception:
+    root_agent = None
+

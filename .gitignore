@@ -10,8 +10,9 @@ venv/
 # Local Codelab authoring assets & builds (not needed in sample code repo)
 img/
 *.html
+*.md
+!README.md
 convert_md_to_docs_html.py
 create_diagrams.py
-*.lab.md
-evaluating_enterprise_ai_agents_with_vertex_ai_and_llm_as_a_judge.md
-evaluating-single-llm-outputs-with-vertex-ai-evaluationlab.md
+scratch/
+

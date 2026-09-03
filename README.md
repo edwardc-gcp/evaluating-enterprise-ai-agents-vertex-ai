@@ -1,18 +1,18 @@
-# Evaluating Enterprise AI Agents on Gemini Enterprise Agent Platform with LLM-as-a-Judge
+# Advanced ADK Evaluation with LLM-as-a-Judge Method
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Google Cloud Gemini Enterprise](https://img.shields.io/badge/Google%20Cloud-Gemini%20Enterprise-4285F4.svg)](https://cloud.google.com/vertex-ai)
+[![Google Cloud Gemini Enterprise](https://img.shields.io/badge/Google%20Cloud-Gemini%20Enterprise-4285F4.svg)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/evaluation-overview)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-This repository contains the complete, production-ready implementation and evaluation assets for the Google Developer Codelab: **[Evaluating Enterprise AI Agents on Gemini Enterprise Agent Platform with LLM-as-a-Judge](https://codelabs.developers.google.com/)**.
+This repository contains the complete, production-ready implementation and evaluation assets for the Google Developer Codelab: **[Advanced ADK Evaluation with LLM-as-a-Judge Method](https://codelabs.developers.google.com/)**.
 
 ---
 
 ## 📖 Overview
 
-Enterprise AI Agents execute multi-turn, multi-step actions across backend databases and third-party APIs. Evaluating them requires more than simple string matching:
-1. **Deterministic Trajectory Matching**: Validates tool-calling sequence, parameter accuracy, and business workflow integrity.
-2. **Gemini GenAI Evaluation Service (LLM-as-a-Judge)**: Evaluates semantic groundedness, tone, question-answering quality, and strict corporate compliance (e.g., 30-day return policy validation) with explainable reasoning (Chain-of-Thought).
+Enterprise AI Agents built with the **Agent Development Kit (ADK)** execute multi-turn, multi-step actions across backend databases and third-party APIs. Evaluating them requires more than simple string matching:
+1. **Deterministic Trajectory Matching (The Math)**: Validates tool-calling sequence, parameter accuracy, and business workflow integrity ($0 cost, <10ms).
+2. **Gemini Enterprise Agent Platform (LLM-as-a-Judge - The Essay & The Law)**: Evaluates semantic groundedness, tone, question-answering quality, and strict corporate compliance (e.g., 30-day return policy validation) with explainable reasoning (Chain-of-Thought).
 
 ```
 +-------------------------------------------------------------------------------+
@@ -30,7 +30,7 @@ Enterprise AI Agents execute multi-turn, multi-step actions across backend datab
                    |                                         |
                    v                                         v
 +------------------------------------+   +--------------------------------------+
-|   Deterministic Trajectory Engine  |   |    Vertex AI Gen AI Evaluation SDK   |
+|   Deterministic Trajectory Engine  |   | Gemini Enterprise Agent Platform SDK |
 |  * Exact Match                     |   |  * Groundedness (LLM Judge)          |
 |  * In-Order Match                  |   |  * QA Quality (LLM Judge)            |
 |  * Precision & Recall              |   |  * Custom Policy Rubric (5-Point)    |
@@ -54,14 +54,19 @@ git clone https://github.com/edwardc-gcp/evaluating-enterprise-ai-agents-vertex-
 cd evaluating-enterprise-ai-agents-vertex-ai
 ```
 
-### 2. Set Up Virtual Environment & Dependencies
+### 2. Set Up Virtual Environment & Dependencies (with uv)
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+
+# Create venv and install dependencies in seconds
+uv venv .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
 
-### 3. Authenticate with Google Cloud & Vertex AI
+### 3. Authenticate with Google Cloud
 ```bash
 gcloud auth application-default login
 gcloud config set project YOUR_PROJECT_ID
@@ -78,11 +83,11 @@ gcloud config set project YOUR_PROJECT_ID
 │   ├── __init__.py
 │   ├── agent.py                    # Customer Service AI Agent supporting v1 (Baseline) & v2 (Challenger)
 │   ├── metrics_config.py           # Deterministic trajectory, Pointwise, and Pairwise LLM-as-a-Judge rubrics
-│   ├── run_evaluation.py           # Pointwise evaluation runner using Vertex AI EvalTask
+│   ├── run_evaluation.py           # Pointwise evaluation runner using EvalTask
 │   └── run_pairwise_eval.py        # Pairwise A/B comparative evaluation runner (v1 vs. v2)
 ├── tests/
 │   ├── __init__.py
-│   └── test_agent_vertex_eval.py   # Automated Pytest CI/CD quality gate assertions
+│   └── test_agent_eval.py          # Automated Pytest CI/CD quality gate assertions
 ├── .gitignore
 ├── README.md
 └── requirements.txt
@@ -124,7 +129,7 @@ python3 src/run_pairwise_eval.py
 
 Run the test suite in your CI/CD pipeline (Cloud Build, GitHub Actions, GitLab CI):
 ```bash
-pytest -v -s tests/test_agent_vertex_eval.py
+pytest -v -s tests/test_agent_eval.py
 ```
 
 ---
@@ -132,7 +137,7 @@ pytest -v -s tests/test_agent_vertex_eval.py
 ## 📚 Related Codelabs & Resources
 
 * **Part 1 Codelab**: [Evaluating Agents with Agent Development Kit (ADK)](https://codelabs.developers.google.com/adk-eval/instructions)
-* **Vertex AI Evaluation Documentation**: [Vertex AI Gen AI Evaluation Service Overview](https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview)
+* **Gemini Enterprise Agent Platform**: [Evaluation Overview Documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/evaluation-overview)
 
 ---
 
