@@ -4,18 +4,14 @@ from vertexai.evaluation import (
     MetricPromptTemplateExamples,
     PointwiseMetric,
     PairwiseMetric,
-    TrajectoryExactMatch,
-    TrajectoryInOrderMatch,
-    TrajectoryPrecision,
-    TrajectoryRecall,
 )
 
 # 1. Tier 1: Deterministic Trajectory Metrics (Rule-Based Tool Execution Verification)
 trajectory_metrics = [
-    TrajectoryExactMatch(),
-    TrajectoryInOrderMatch(),
-    TrajectoryPrecision(),
-    TrajectoryRecall(),
+    "trajectory_exact_match",
+    "trajectory_in_order_match",
+    "trajectory_precision",
+    "trajectory_recall",
 ]
 
 # 2. Tier 2: Managed Vertex AI Model-Based LLM Judges
