@@ -193,11 +193,11 @@ async def test_agent_quality_and_trajectory_gates():
 
     print(f"\n[CI/CD Metrics] Trajectory: {trajectory_score:.2f}, Groundedness: {groundedness_score:.2f}, Policy: {policy_score:.2f}")
 
-    if agent_ver == "v2":
-        assert trajectory_score >= 0.8, f"❌ Trajectory matching score too low: {trajectory_score}"
-        assert groundedness_score >= 4.0, f"❌ Groundedness score too low: {groundedness_score}"
-        assert policy_score >= 4.0, f"❌ Policy compliance score too low: {policy_score}"
-        print("✅ All Enterprise AI Agent Quality Gates Passed for v2!")
+    # Production Quality Gate Assertions (Enforce minimum enterprise thresholds for release)
+    assert trajectory_score >= 0.90, f"❌ Trajectory matching score too low: {trajectory_score:.2f} (Required: >= 0.90)"
+    assert groundedness_score >= 4.0, f"❌ Groundedness score too low: {groundedness_score:.2f} (Required: >= 4.00)"
+    assert policy_score >= 4.0, f"❌ Policy compliance score too low: {policy_score:.2f} (Required: >= 4.00)"
+    print(f"✅ All Enterprise AI Agent Quality Gates Passed for {agent_ver}!")
 
 
 if __name__ == "__main__":
