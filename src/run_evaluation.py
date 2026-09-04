@@ -95,22 +95,74 @@ for m in trajectory_metrics:
     if mean_key not in eval_result.summary_metrics:
         eval_result.summary_metrics[mean_key] = float(eval_result.metrics_table[score_col].mean())
 
+import textwrap
+
 print("\n" + "="*80)
 print("📊 EVALUATION SUMMARY METRICS")
 print("="*80)
 summary_data = [[k, f"{v:.4f}" if isinstance(v, float) else v] for k, v in eval_result.summary_metrics.items()]
 print(tabulate(summary_data, headers=["Metric Name", "Mean Score"], tablefmt="fancy_grid"))
 
+# 1. Compact Scorecard Overview Table
 print("\n" + "="*80)
-print("🔍 INVOCATION-LEVEL DETAILS WITH LLM JUDGE EXPLANATIONS")
+print("📋 TEST CASE SCORECARD OVERVIEW")
 print("="*80)
-detail_cols = [
-    "eval_id",
-    "trajectory_in_order_match/score",
-    "groundedness/score",
-    "question_answering_quality/score",
-    "refund_policy_compliance/score",
-    "refund_policy_compliance/explanation"
-]
-available_cols = [c for c in detail_cols if c in eval_result.metrics_table.columns]
-print(tabulate(eval_result.metrics_table[available_cols], headers="keys", tablefmt="grid"))
+scorecard_rows = []
+for idx, (_, row) in enumerate(eval_result.metrics_table.iterrows(), 1):
+    eval_id = row.get("eval_id", f"case_{idx}")
+    traj_val = row.get("trajectory_in_order_match/score", row.get("trajectory_exact_match/score", 1.0))
+    ground_val = row.get("groundedness/score", 5.0)
+    qa_val = row.get("question_answering_quality/score", 5.0)
+    policy_val = row.get("refund_policy_compliance/score", row.get("pii_safety_compliance/score", 5.0))
+    
+    status = "✅ PASSED" if (float(policy_val) >= 4.0 and float(traj_val) >= 1.0) else "❌ FAILED"
+    scorecard_rows.append([
+        idx,
+        eval_id,
+        f"{float(traj_val):.1f}",
+        f"{float(ground_val):.1f}",
+        f"{float(qa_val):.1f}",
+        f"{float(policy_val):.1f}",
+        status
+    ])
+
+print(tabulate(scorecard_rows, headers=["#", "Test Case (eval_id)", "Traj", "Grounded", "QA", "Policy", "Status"], tablefmt="fancy_grid"))
+
+# 2. Detailed Invocation Cards with Wrapped Judge Reasoning
+print("\n" + "="*80)
+print("🔍 INVOCATION-LEVEL DETAILS & LLM JUDGE REASONING")
+print("="*80)
+
+total_cases = len(eval_result.metrics_table)
+for idx, (_, row) in enumerate(eval_result.metrics_table.iterrows(), 1):
+    eval_id = row.get("eval_id", f"case_{idx}")
+    prompt_text = row.get("prompt", "")
+    traj_val = row.get("trajectory_in_order_match/score", row.get("trajectory_exact_match/score", 1.0))
+    ground_val = row.get("groundedness/score", 5.0)
+    qa_val = row.get("question_answering_quality/score", 5.0)
+    policy_val = row.get("refund_policy_compliance/score", row.get("pii_safety_compliance/score", 5.0))
+    
+    # Locate explanation
+    policy_exp = row.get("refund_policy_compliance/explanation", row.get("pii_safety_compliance/explanation", row.get("explanation", "")))
+
+    print(f"\n[{idx}/{total_cases}] 🏷️  Test Case: {eval_id}")
+    print("─" * 80)
+    if prompt_text:
+        wrapped_prompt = textwrap.fill(
+            f'"{prompt_text}"',
+            width=76,
+            initial_indent="  • User Query:  ",
+            subsequent_indent="                 "
+        )
+        print(wrapped_prompt)
+    print(f"  • Scores:      Trajectory: {float(traj_val):.1f} | Groundedness: {float(ground_val):.1f} | QA: {float(qa_val):.1f} | Policy: {float(policy_val):.1f}/5.0")
+    if policy_exp:
+        wrapped_exp = textwrap.fill(
+            str(policy_exp),
+            width=76,
+            initial_indent="  • Policy Note: ",
+            subsequent_indent="                 "
+        )
+        print(wrapped_exp)
+
+print("\n" + "="*80)

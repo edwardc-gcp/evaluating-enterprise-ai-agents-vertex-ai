@@ -86,21 +86,83 @@ except Exception as e:
     else:
         raise e
 
+import textwrap
+
 print("\n" + "="*80)
-print("🏆 PAIRWISE A/B EVALUATION SUMMARY")
+print("🏆 PAIRWISE A/B TOURNAMENT SCORECARD (v2 Challenger vs. v1 Baseline)")
 print("="*80)
 summary_data = [[k, f"{v:.2%}" if "rate" in k else v] for k, v in eval_result.summary_metrics.items()]
-print(tabulate(summary_data, headers=["Pairwise Metric", "Distribution / Score"], tablefmt="fancy_grid"))
+print(tabulate(summary_data, headers=["Pairwise Metric / Dimension", "Score / Rate"], tablefmt="fancy_grid"))
+
+# Locate choice and explanation columns
+choice_col = None
+explanation_col = None
+for col in eval_result.metrics_table.columns:
+    col_lower = col.lower()
+    if any(k in col_lower for k in ["choice", "winner", "preference"]):
+        choice_col = col
+    elif any(k in col_lower for k in ["explanation", "reason"]):
+        explanation_col = col
+
+# 1. Compact Overview Table
+print("\n" + "="*80)
+print("📋 HEAD-TO-HEAD MATCHUP OVERVIEW")
+print("="*80)
+overview_rows = []
+for idx, (_, row) in enumerate(eval_result.metrics_table.iterrows(), 1):
+    eval_id = row.get("eval_id", f"case_{idx}")
+    raw_choice = str(row.get(choice_col, "N/A")).strip().upper() if choice_col else "N/A"
+    if "CANDIDATE" in raw_choice or raw_choice == "A":
+        verdict = "🏆 CANDIDATE (v2 Challenger)"
+    elif "BASELINE" in raw_choice or raw_choice == "B":
+        verdict = "🥈 BASELINE (v1 Baseline)"
+    elif "SAME" in raw_choice or "TIE" in raw_choice:
+        verdict = "🤝 TIE / EQUAL QUALITY"
+    else:
+        verdict = raw_choice
+    overview_rows.append([idx, eval_id, verdict])
+
+print(tabulate(overview_rows, headers=["#", "Test Case (eval_id)", "LLM Judge Verdict"], tablefmt="fancy_grid"))
+
+# 2. Detailed Invocation Cards with Wrapped Judge Reasoning
+print("\n" + "="*80)
+print("🔍 HEAD-TO-HEAD DECISION BREAKDOWN & JUDGE REASONING")
+print("="*80)
+
+total_cases = len(eval_result.metrics_table)
+for idx, (_, row) in enumerate(eval_result.metrics_table.iterrows(), 1):
+    eval_id = row.get("eval_id", f"case_{idx}")
+    prompt_text = row.get("prompt", "")
+    raw_choice = str(row.get(choice_col, "N/A")).strip().upper() if choice_col else "N/A"
+    
+    if "CANDIDATE" in raw_choice or raw_choice == "A":
+        badge = "🏆 CANDIDATE (v2 Challenger Win)"
+    elif "BASELINE" in raw_choice or raw_choice == "B":
+        badge = "🥈 BASELINE (v1 Baseline Win)"
+    elif "SAME" in raw_choice or "TIE" in raw_choice:
+        badge = "🤝 TIE / EQUAL QUALITY"
+    else:
+        badge = f"⚖️  {raw_choice}"
+        
+    explanation = str(row.get(explanation_col, "No explanation provided.")).strip() if explanation_col else "N/A"
+
+    print(f"\n[{idx}/{total_cases}] 🏷️  Test Case: {eval_id}")
+    print("─" * 80)
+    print(f"  • Verdict:     {badge}")
+    if prompt_text:
+        wrapped_prompt = textwrap.fill(
+            f'"{prompt_text}"',
+            width=76,
+            initial_indent="  • User Query:  ",
+            subsequent_indent="                 "
+        )
+        print(wrapped_prompt)
+    wrapped_exp = textwrap.fill(
+        explanation,
+        width=76,
+        initial_indent="  • LLM Judge:   ",
+        subsequent_indent="                 "
+    )
+    print(wrapped_exp)
 
 print("\n" + "="*80)
-print("🔍 HEAD-TO-HEAD DECISION DETAILS & REASONING")
-print("="*80)
-pairwise_cols = ["eval_id"]
-for col in eval_result.metrics_table.columns:
-    if any(k in col.lower() for k in ["choice", "explanation", "winner", "preference"]):
-        if col not in pairwise_cols:
-            pairwise_cols.append(col)
-if len(pairwise_cols) == 1:
-    pairwise_cols = [c for c in ["eval_id", "prompt", "response", "baseline_model_response"] if c in eval_result.metrics_table.columns]
-
-print(tabulate(eval_result.metrics_table[pairwise_cols], headers="keys", tablefmt="grid"))
