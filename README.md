@@ -56,11 +56,7 @@ cd evaluating-enterprise-ai-agents-vertex-ai
 
 ### 2. Set Up Virtual Environment & Dependencies (with uv)
 ```bash
-# Install uv (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source $HOME/.local/bin/env
-
-# Create venv and install dependencies in seconds
+# Cloud Shell has uv pre-installed. (On local machines: curl -LsSf https://astral.sh/uv/install.sh | sh)
 uv venv .venv
 source .venv/bin/activate
 uv pip install -r requirements.txt

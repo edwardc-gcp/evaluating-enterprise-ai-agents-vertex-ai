@@ -27,7 +27,17 @@ export REGION="${REGION:-global}"
 export GOOGLE_CLOUD_LOCATION="${GOOGLE_CLOUD_LOCATION:-global}"
 export MODEL_ID="${MODEL_ID:-gemini-3.7-flash}"
 
-# 3. Set Application Default Credentials quota project
+# 3. Ensure Application Default Credentials (ADC) exist and configure quota project
+ADC_FILE="$HOME/.config/gcloud/application_default_credentials.json"
+if [ ! -f "$ADC_FILE" ] && [ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+    echo "⚠️  Application Default Credentials (ADC) not detected."
+    if [ -t 0 ]; then
+        echo "👉 Running 'gcloud auth application-default login'..."
+        gcloud auth application-default login
+    else
+        echo "👉 Please run 'gcloud auth application-default login' in your terminal."
+    fi
+fi
 gcloud auth application-default set-quota-project "$PROJECT_ID" --quiet >/dev/null 2>&1 || true
 
 # 4. Write to .env file in the repository root
