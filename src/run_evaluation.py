@@ -156,9 +156,26 @@ for idx, (_, row) in enumerate(eval_result.metrics_table.iterrows(), 1):
         )
         print(wrapped_prompt)
     print(f"  • Scores:      Trajectory: {float(traj_val):.1f} | Groundedness: {float(ground_val):.1f} | QA: {float(qa_val):.1f} | Policy: {float(policy_val):.1f}/5.0")
-    if policy_exp:
+    
+    # Dynamically extract and format all LLM judge explanation columns
+    exp_printed = False
+    for col in eval_result.metrics_table.columns:
+        if "explanation" in col.lower() or "reason" in col.lower():
+            exp_text = row.get(col)
+            if exp_text and str(exp_text).strip() and str(exp_text).strip().lower() != "nan":
+                metric_label = col.split("/")[0].replace("_", " ").title()
+                wrapped_exp = textwrap.fill(
+                    str(exp_text).strip(),
+                    width=76,
+                    initial_indent=f"  • {metric_label}: ",
+                    subsequent_indent="                 "
+                )
+                print(wrapped_exp)
+                exp_printed = True
+    
+    if not exp_printed and policy_exp and str(policy_exp).strip().lower() != "nan":
         wrapped_exp = textwrap.fill(
-            str(policy_exp),
+            str(policy_exp).strip(),
             width=76,
             initial_indent="  • Policy Note: ",
             subsequent_indent="                 "
