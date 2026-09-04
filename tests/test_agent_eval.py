@@ -1,6 +1,12 @@
 import os
 import sys
 import json
+import warnings
+
+# Suppress SDK deprecation warnings in test runs
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+
 try:
     import pytest
     HAS_PYTEST = True
