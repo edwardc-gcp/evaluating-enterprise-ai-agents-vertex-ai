@@ -67,6 +67,10 @@ Run the automated setup script to detect/set your project, enable APIs, and gene
 ```bash
 ./init.sh
 ```
+
+> [!NOTE]
+> During `./init.sh`, the script checks for Application Default Credentials (ADC). If prompted about running on a Compute Engine machine, enter `y`, authenticate via the OAuth link in your browser, and paste the authorization code back into the console to complete authentication.
+
 *(Or run `source ./set_env.sh` anytime to load the environment variables into your current terminal).*
 
 

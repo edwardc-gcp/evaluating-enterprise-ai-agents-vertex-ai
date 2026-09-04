@@ -163,45 +163,55 @@ def _build_pointwise_metric(metric_name: str, criteria: dict, rating_rubric: dic
         rating_rubric=rating_rubric,
     )
 
-def _build_pairwise_metric(metric_name: str, criteria: dict, input_variables: list = None):
+def _build_pairwise_metric(metric_name: str, criteria: dict, rating_rubric: dict = None, input_variables: list = None):
     """Safely builds a PairwiseMetric across any Vertex AI SDK version."""
     if input_variables is None:
         input_variables = ["prompt", "response", "baseline_model_response"]
+    if rating_rubric is None:
+        rating_rubric = {
+            "A": "Candidate A is better across the evaluation criteria.",
+            "B": "Candidate B is better across the evaluation criteria.",
+            "SAME": "Both candidates perform equally across the evaluation criteria.",
+        }
     if _PairwiseMetricPromptTemplate is not None and _PairwiseMetric is not None:
         try:
             template = _PairwiseMetricPromptTemplate(
                 criteria=criteria,
+                rating_rubric=rating_rubric,
                 input_variables=input_variables,
             )
             return _PairwiseMetric(metric=metric_name, metric_prompt_template=template)
         except Exception:
             try:
-                template = _PairwiseMetricPromptTemplate(criteria=criteria)
+                template = _PairwiseMetricPromptTemplate(
+                    criteria=criteria,
+                    rating_rubric=rating_rubric,
+                )
                 return _PairwiseMetric(metric=metric_name, metric_prompt_template=template)
             except Exception:
-                pass
-
-    if _PairwiseMetric is not None:
-        try:
-            if hasattr(_MetricPromptTemplateExamples, "get_prompt_template"):
                 try:
-                    tmpl = _MetricPromptTemplateExamples.get_prompt_template("pairwise_reasoning")
-                    return _PairwiseMetric(
-                        metric=metric_name,
-                        metric_prompt_template=tmpl,
-                        criteria=criteria,
-                    )
+                    template = _PairwiseMetricPromptTemplate(criteria=criteria)
+                    return _PairwiseMetric(metric=metric_name, metric_prompt_template=template)
                 except Exception:
                     pass
-            return _PairwiseMetric(
-                metric=metric_name,
-                criteria=criteria,
-            )
-        except Exception:
+
+    if _PairwiseMetric is not None:
+        if hasattr(_MetricPromptTemplateExamples, "get_prompt_template"):
             try:
-                return _PairwiseMetric(metric=metric_name)
+                tmpl = _MetricPromptTemplateExamples.get_prompt_template("pairwise_question_answering_quality")
+                return _PairwiseMetric(
+                    metric="pairwise_question_answering_quality",
+                    metric_prompt_template=tmpl,
+                )
             except Exception:
                 pass
+        try:
+            return _PairwiseMetric(metric="pairwise_question_answering_quality")
+        except Exception:
+            pass
+
+    if HAS_VERTEX_EVAL:
+        return "pairwise_question_answering_quality"
 
     return _FallbackPairwiseMetric(
         metric=metric_name,
@@ -412,11 +422,18 @@ custom_pii_metric = _build_pointwise_metric(
 )
 
 # 5. Tier 5: Pairwise Comparative LLM-as-a-Judge (A/B Model Upgrade Benchmarking)
+pairwise_rubric = {
+    "A": "Candidate A (Challenger) is better: strictly adheres to company refund policies, verifies prerequisite records, and maintains customer empathy.",
+    "B": "Candidate B (Baseline) is better: strictly adheres to company refund policies, verifies prerequisite records, and maintains customer empathy.",
+    "SAME": "Both candidates provide equal policy compliance, factual accuracy, and response quality.",
+}
+
 pairwise_comparison_metric = _build_pairwise_metric(
     metric_name="agent_pairwise_comparison",
     criteria={
-        "agent_pairwise_comparison": "Compare Candidate A and Candidate B for professional customer service quality, clarity, empathy, and adherence to enterprise policy."
+        "agent_pairwise_comparison": "Compare Candidate A and Candidate B for professional customer service quality, clarity, empathy, and strict adherence to enterprise policy (such as verifying order details and enforcing the 30-day return policy)."
     },
+    rating_rubric=pairwise_rubric,
 )
 
 # ==============================================================================

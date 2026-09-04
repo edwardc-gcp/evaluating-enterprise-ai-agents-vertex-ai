@@ -95,10 +95,12 @@ print(tabulate(summary_data, headers=["Pairwise Metric", "Distribution / Score"]
 print("\n" + "="*80)
 print("🔍 HEAD-TO-HEAD DECISION DETAILS & REASONING")
 print("="*80)
-pairwise_cols = [
-    "eval_id",
-    "agent_pairwise_comparison/choice",
-    "agent_pairwise_comparison/explanation"
-]
-available_cols = [c for c in pairwise_cols if c in eval_result.metrics_table.columns]
-print(tabulate(eval_result.metrics_table[available_cols], headers="keys", tablefmt="grid"))
+pairwise_cols = ["eval_id"]
+for col in eval_result.metrics_table.columns:
+    if any(k in col.lower() for k in ["choice", "explanation", "winner", "preference"]):
+        if col not in pairwise_cols:
+            pairwise_cols.append(col)
+if len(pairwise_cols) == 1:
+    pairwise_cols = [c for c in ["eval_id", "prompt", "response", "baseline_model_response"] if c in eval_result.metrics_table.columns]
+
+print(tabulate(eval_result.metrics_table[pairwise_cols], headers="keys", tablefmt="grid"))

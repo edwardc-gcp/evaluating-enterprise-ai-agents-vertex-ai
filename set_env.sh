@@ -32,10 +32,11 @@ ADC_FILE="$HOME/.config/gcloud/application_default_credentials.json"
 if [ ! -f "$ADC_FILE" ] && [ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
     echo "⚠️  Application Default Credentials (ADC) not detected."
     if [ -t 0 ]; then
-        echo "👉 Running 'gcloud auth application-default login'..."
+        echo "👉 Initiating 'gcloud auth application-default login'..."
+        echo "💡 Note: Enter 'y' if prompted about Compute Engine machine, sign in via the browser link, and paste the authorization code back here."
         gcloud auth application-default login
     else
-        echo "👉 Please run 'gcloud auth application-default login' in your terminal."
+        echo "👉 Please run 'gcloud auth application-default login' in your terminal and paste the authorization code back to complete."
     fi
 fi
 gcloud auth application-default set-quota-project "$PROJECT_ID" --quiet >/dev/null 2>&1 || true
