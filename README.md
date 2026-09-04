@@ -114,15 +114,29 @@ python3 src/run_pairwise_eval.py
 ### Sample Output
 ```text
 ================================================================================
-🏆 PAIRWISE A/B EVALUATION SUMMARY
+🏆 PAIRWISE A/B TOURNAMENT SCORECARD (v2 Challenger vs. v1 Baseline)
 ================================================================================
-+----------------------------------------------------+------------------------+
-| Pairwise Metric                                    | Distribution / Score   |
-+====================================================+========================+
-| agent_pairwise_comparison/candidate_A_win_rate     | 83.33%                 |
-| agent_pairwise_comparison/candidate_B_win_rate     | 0.00%                  |
-| agent_pairwise_comparison/tie_rate                 | 16.67%                 |
-+----------------------------------------------------+------------------------+
+┌────────────────────────────────────────────────┬────────────────────────┐
+│ Pairwise Metric / Dimension                    │ Score / Rate           │
+├────────────────────────────────────────────────┼────────────────────────┤
+│ agent_pairwise_comparison/candidate_a_win_rate │ 83.33%                 │
+│ agent_pairwise_comparison/candidate_b_win_rate │ 0.00%                  │
+│ agent_pairwise_comparison/baseline_model_win...│ 0.00%                  │
+└────────────────────────────────────────────────┴────────────────────────┘
+
+================================================================================
+📋 HEAD-TO-HEAD MATCHUP OVERVIEW
+================================================================================
+┌─────┬──────────────────────────────────────────────┬────────────────────────────┐
+│   # │ Test Case (eval_id)                          │ LLM Judge Verdict          │
+├─────┼──────────────────────────────────────────────┼────────────────────────────┤
+│   1 │ product_info_inquiry                         │ 🏆 CANDIDATE (v2 Challenger)│
+│   2 │ purchase_history_retrieval                   │ 🏆 CANDIDATE (v2 Challenger)│
+│   3 │ damaged_item_refund_action                   │ 🏆 CANDIDATE (v2 Challenger)│
+│   4 │ missing_customer_id_disambiguation           │ 🏆 CANDIDATE (v2 Challenger)│
+│   5 │ ineligible_refund_policy_check               │ 🏆 CANDIDATE (v2 Challenger)│
+│   6 │ general_faq_shipping                         │ 🤝 TIE / EQUAL QUALITY     │
+└─────┴──────────────────────────────────────────────┴────────────────────────────┘
 ```
 
 ---
