@@ -25,7 +25,7 @@ export GOOGLE_CLOUD_PROJECT="$PROJECT_ID"
 export GOOGLE_GENAI_USE_VERTEXAI="TRUE"
 export REGION="${REGION:-global}"
 export GOOGLE_CLOUD_LOCATION="${GOOGLE_CLOUD_LOCATION:-global}"
-export MODEL_ID="${MODEL_ID:-gemini-3.7-flash}"
+export MODEL_ID="${MODEL_ID:-gemini-3.8-flash}"
 
 # 3. Ensure Application Default Credentials (ADC) exist and configure quota project
 ADC_FILE="$HOME/.config/gcloud/application_default_credentials.json"

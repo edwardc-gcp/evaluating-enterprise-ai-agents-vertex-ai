@@ -260,7 +260,7 @@ try:
     except ImportError:
         from google.adk.agent import Agent
 
-    model_id = os.environ.get("MODEL_ID", "gemini-3.7-flash")
+    model_id = os.environ.get("MODEL_ID", "gemini-3.8-flash")
     agent_version = os.environ.get("AGENT_VERSION", "v1").lower()
     active_instruction = INSTRUCTION_V2 if agent_version == "v2" else INSTRUCTION_V1
 
