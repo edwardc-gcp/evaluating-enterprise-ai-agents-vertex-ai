@@ -46,7 +46,7 @@
         }
       }
     ],
-    "context": "Order Record ORD-102: Status: Delivered, Items: USB-C Cable ($15), Phone Case ($20), Total: $35. Eligible for damage claim refund."
+    "context": "Order Record ORD-102: Status: Delivered on 2023-11-01 (5 days ago, within 30-day return window). Items: USB-C Cable ($15.00) & Phone Case ($20.00), Total: $35.00. Eligible for damage claim refund. Refund Tool Execution Output: Approved and processed $35.00 credit to original payment method, Transaction Reference: REF-ORD102-DMG."
   },
   {
     "eval_id": "ineligible_refund_policy_check",
@@ -60,14 +60,14 @@
         }
       }
     ],
-    "context": "Order Record ORD-101: Purchase Date: 2023-10-15 (delivered over 180 days ago). Policy: Returns/refunds only accepted within 30 days of delivery."
+    "context": "Order Record ORD-101: Purchase/Delivery Date: 2023-10-15 (delivered over 180 days ago). Total: $120.00. Policy: Returns/refunds only accepted within 30 days of delivery. Outside eligible return window; cannot be refunded."
   },
   {
     "eval_id": "missing_customer_id_disambiguation",
     "prompt": "Can you show me my past orders?",
     "reference": "I would be happy to help check your orders! Could you please provide your Customer ID?",
     "reference_trajectory": [],
-    "context": "Customer Auth System: No active authenticated customer session. Agent must request customer_id."
+    "context": "Customer Auth System: No active authenticated customer session. To check order history securely, agent must request the user's registered Customer ID (e.g., CUST001)."
   },
   {
     "eval_id": "out_of_catalog_product_inquiry",
@@ -81,6 +81,6 @@
         }
       }
     ],
-    "context": "Inventory Catalog: Query returned 0 matching products for 'holographic projectors'."
+    "context": "Inventory Catalog: Query returned 0 matching products for 'holographic projectors' (not carried in store). Available store catalog categories to recommend instead: wireless audio and mobile accessories."
   }
 ]

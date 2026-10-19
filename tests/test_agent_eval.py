@@ -134,7 +134,7 @@ def test_pii_security_safeguard():
 
 
 def test_metrics_configuration():
-    """Validates metrics_config module exports and compatibility."""
+    """Validates metrics_config module exports, context/trajectory awareness, and dataset grounding."""
     assert len(trajectory_metrics) == 4
     assert "trajectory_in_order_match" in trajectory_metrics
     assert "trajectory_exact_match" in trajectory_metrics
@@ -143,6 +143,16 @@ def test_metrics_configuration():
     assert custom_pii_metric is not None
     assert pairwise_comparison_metric is not None
     assert len(all_metrics) >= 5
+
+    # Verify ORD-102 damaged_item_refund_action grounding alignment between Agent v2 and eval_dataset.json
+    with open(DATASET_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    ord102_case = next(item for item in data if item["eval_id"] == "damaged_item_refund_action")
+    agent_v2 = CustomerServiceAgent(model_version="v2")
+    v2_ord102 = agent_v2.run(ord102_case["prompt"])
+    for fact in ("2023-11-01", "30-day", "$35.00", "original payment method", "REF-ORD102-DMG"):
+        assert fact in v2_ord102["response"], f"Agent v2 ORD-102 response missing expected fact: {fact}"
+        assert fact in ord102_case["context"], f"ORD-102 dataset context missing expected grounding fact: {fact}"
 
 
 @pytest.mark.asyncio

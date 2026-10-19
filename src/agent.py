@@ -83,7 +83,7 @@ class CustomerServiceAgent:
         elif "ord-102" in prompt_lower and "damaged" in prompt_lower:
             if self.model_version == "v2":
                 return {
-                    "response": "Your refund request for order ORD-102 due to item damage has been approved and processed. A credit of $35.00 has been issued to your original payment method. Transaction reference: REF-ORD102-DMG.",
+                    "response": "I reviewed order ORD-102 (Delivered on 2023-11-01, within our 30-day return window) for the USB-C Cable & Phone Case ($35.00). Your refund request due to item damage has been approved and processed. A credit of $35.00 has been issued to your original payment method. Transaction reference: REF-ORD102-DMG.",
                     "trajectory": [
                         {"name": "lookup_order", "arguments": {"order_id": "ORD-102"}},
                         {"name": "issue_refund", "arguments": {"order_id": "ORD-102", "reason": "damaged"}}
@@ -225,11 +225,14 @@ def lookup_order(order_id: str) -> dict:
 
 def issue_refund(order_id: str, reason: str = "") -> dict:
     """Issue a refund for an eligible order."""
+    clean_id = order_id.upper().replace("-", "")
+    suffix = "DMG" if "damage" in reason.lower() else "SUCCESS"
     return {
         "status": "refunded",
         "order_id": order_id,
         "amount": 35.00,
-        "transaction_ref": f"REF-{order_id}-SUCCESS"
+        "refund_destination": "original payment method",
+        "transaction_ref": f"REF-{clean_id}-{suffix}"
     }
 
 
