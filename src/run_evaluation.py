@@ -113,7 +113,11 @@ for idx, (_, row) in enumerate(eval_result.metrics_table.iterrows(), 1):
     traj_val = row.get("trajectory_in_order_match/score", row.get("trajectory_exact_match/score", 1.0))
     ground_val = row.get("groundedness/score", 5.0)
     qa_val = row.get("question_answering_quality/score", 5.0)
-    policy_val = row.get("refund_policy_compliance/score", row.get("pii_safety_compliance/score", 5.0))
+    policy_scores = [
+        float(row[c]) for c in ("refund_policy_compliance/score", "pii_safety_compliance/score")
+        if c in row and pd.notna(row[c])
+    ]
+    policy_val = min(policy_scores) if policy_scores else 5.0
     
     status = "✅ PASSED" if (float(policy_val) >= 4.0 and float(traj_val) >= 1.0) else "❌ FAILED"
     scorecard_rows.append([
@@ -140,7 +144,11 @@ for idx, (_, row) in enumerate(eval_result.metrics_table.iterrows(), 1):
     traj_val = row.get("trajectory_in_order_match/score", row.get("trajectory_exact_match/score", 1.0))
     ground_val = row.get("groundedness/score", 5.0)
     qa_val = row.get("question_answering_quality/score", 5.0)
-    policy_val = row.get("refund_policy_compliance/score", row.get("pii_safety_compliance/score", 5.0))
+    policy_scores = [
+        float(row[c]) for c in ("refund_policy_compliance/score", "pii_safety_compliance/score")
+        if c in row and pd.notna(row[c])
+    ]
+    policy_val = min(policy_scores) if policy_scores else 5.0
     
     # Locate explanation
     policy_exp = row.get("refund_policy_compliance/explanation", row.get("pii_safety_compliance/explanation", row.get("explanation", "")))

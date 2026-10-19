@@ -30,7 +30,7 @@
   {
     "eval_id": "damaged_item_refund_action",
     "prompt": "I want a refund for order ORD-102 because it arrived damaged.",
-    "reference": "Your refund for order ORD-102 due to item damage has been successfully processed for $35.0. Your order status has been updated to refunded.",
+    "reference": "I reviewed order ORD-102 (Delivered on 2023-11-01, within our 30-day return window) for the USB-C Cable & Phone Case ($35.00). Your refund request due to item damage has been approved and processed. A credit of $35.00 has been issued to your original payment method. Transaction reference: REF-ORD102-DMG.",
     "reference_trajectory": [
       {
         "name": "lookup_order",

@@ -144,13 +144,16 @@ def test_metrics_configuration():
     assert pairwise_comparison_metric is not None
     assert len(all_metrics) >= 5
 
-    # Verify ORD-102 damaged_item_refund_action grounding alignment between Agent v2 and eval_dataset.json
+    # Verify ORD-102 damaged_item_refund_action grounding & audit-trail differentiation between Agent v1 and v2
     with open(DATASET_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
     ord102_case = next(item for item in data if item["eval_id"] == "damaged_item_refund_action")
+    agent_v1 = CustomerServiceAgent(model_version="v1")
+    v1_ord102 = agent_v1.run(ord102_case["prompt"])
     agent_v2 = CustomerServiceAgent(model_version="v2")
     v2_ord102 = agent_v2.run(ord102_case["prompt"])
     for fact in ("2023-11-01", "30-day", "$35.00", "original payment method", "REF-ORD102-DMG"):
+        assert fact not in v1_ord102["response"], f"Agent v1 ORD-102 response should omit audit-trail receipt fact: {fact}"
         assert fact in v2_ord102["response"], f"Agent v2 ORD-102 response missing expected fact: {fact}"
         assert fact in ord102_case["context"], f"ORD-102 dataset context missing expected grounding fact: {fact}"
 
